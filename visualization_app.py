@@ -42,65 +42,40 @@ if uploaded_file_1 is not None and uploaded_file_2 is not None:
     # Dropdown for graph type
     graph_type = st.selectbox(
         "Select Graph Type",
-        ["Line", "Scatter", "Bar", "Pie"]
+        ["Line", "Scatter", "Bar"]
     )
 
     # Plot button
-    if st.button("Plot Graphs"):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))  # Create two subplots side by side
+    if st.button("Plot Graph"):
+        fig, ax = plt.subplots(figsize=(10, 6))  # Create a single plot
 
-        # Plot for File 1
+        # Plot for File 1 with a different color
         if graph_type == "Line":
-            ax1.plot(data_1[x_column_1], data_1[y_column_1], marker='o')
-            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Line Plot)")
+            ax.plot(data_1[x_column_1], data_1[y_column_1], label=f"File 1: {y_column_1} vs {x_column_1}", color='blue', marker='o')
         
         elif graph_type == "Scatter":
-            ax1.scatter(data_1[x_column_1], data_1[y_column_1])
-            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Scatter Plot)")
+            ax.scatter(data_1[x_column_1], data_1[y_column_1], label=f"File 1: {y_column_1} vs {x_column_1}", color='blue')
         
         elif graph_type == "Bar":
-            ax1.bar(data_1[x_column_1], data_1[y_column_1])
-            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Bar Chart)")
+            ax.bar(data_1[x_column_1], data_1[y_column_1], label=f"File 1: {y_column_1} vs {x_column_1}", alpha=0.5)
 
-        elif graph_type == "Pie":
-            if len(data_1[x_column_1].unique()) <= 10:  # Pie chart requires fewer unique categories
-                ax1.pie(
-                    data_1[y_column_1],
-                    labels=data_1[x_column_1],
-                    autopct='%1.1f%%',
-                    startangle=90,
-                )
-                ax1.set_title(f"{y_column_1} (File 1 - Pie Chart)")
-
-        # Plot for File 2
+        # Plot for File 2 with a different color
         if graph_type == "Line":
-            ax2.plot(data_2[x_column_2], data_2[y_column_2], marker='o')
-            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Line Plot)")
+            ax.plot(data_2[x_column_2], data_2[y_column_2], label=f"File 2: {y_column_2} vs {x_column_2}", color='red', marker='o')
         
         elif graph_type == "Scatter":
-            ax2.scatter(data_2[x_column_2], data_2[y_column_2])
-            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Scatter Plot)")
+            ax.scatter(data_2[x_column_2], data_2[y_column_2], label=f"File 2: {y_column_2} vs {x_column_2}", color='red')
         
         elif graph_type == "Bar":
-            ax2.bar(data_2[x_column_2], data_2[y_column_2])
-            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Bar Chart)")
+            ax.bar(data_2[x_column_2], data_2[y_column_2], label=f"File 2: {y_column_2} vs {x_column_2}", alpha=0.5)
 
-        elif graph_type == "Pie":
-            if len(data_2[x_column_2].unique()) <= 10:  # Pie chart requires fewer unique categories
-                ax2.pie(
-                    data_2[y_column_2],
-                    labels=data_2[x_column_2],
-                    autopct='%1.1f%%',
-                    startangle=90,
-                )
-                ax2.set_title(f"{y_column_2} (File 2 - Pie Chart)")
-
-        # Set common axis labels for the plots
-        if graph_type != "Pie":
-            ax1.set_xlabel(x_column_1)
-            ax1.set_ylabel(y_column_1)
-            ax2.set_xlabel(x_column_2)
-            ax2.set_ylabel(y_column_2)
+        # Add labels and title
+        ax.set_xlabel(f"{x_column_1} (File 1) and {x_column_2} (File 2)")
+        ax.set_ylabel("Values")
+        ax.set_title(f"{y_column_1} vs {x_column_1} (File 1) and {y_column_2} vs {x_column_2} (File 2)")
+        
+        # Show legend to differentiate the two datasets
+        ax.legend()
 
         st.pyplot(fig)
 
