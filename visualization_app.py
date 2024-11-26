@@ -18,72 +18,91 @@ st.title("CSV Data Visualization App")
 uploaded_file_1 = st.file_uploader("Upload CSV File 1", type=["csv"])
 uploaded_file_2 = st.file_uploader("Upload CSV File 2", type=["csv"])
 
-if uploaded_file_1 is not None or uploaded_file_2 is not None:
-    # Choose the file to display
-    file_choice = st.selectbox(
-        "Select the CSV file to visualize",
-        ["None", "File 1", "File 2"]
+if uploaded_file_1 is not None and uploaded_file_2 is not None:
+    # Read the CSV files
+    data_1 = pd.read_csv(uploaded_file_1)
+    data_2 = pd.read_csv(uploaded_file_2)
+
+    # Display the previews of both files
+    st.write("### Data Preview (File 1)")
+    st.dataframe(data_1)
+    st.write("### Data Preview (File 2)")
+    st.dataframe(data_2)
+
+    # Dropdown for selecting columns for File 1
+    columns_1 = data_1.columns.tolist()
+    x_column_1 = st.selectbox("Select X-axis column for File 1", columns_1, key="x1")
+    y_column_1 = st.selectbox("Select Y-axis column for File 1", columns_1, key="y1")
+
+    # Dropdown for selecting columns for File 2
+    columns_2 = data_2.columns.tolist()
+    x_column_2 = st.selectbox("Select X-axis column for File 2", columns_2, key="x2")
+    y_column_2 = st.selectbox("Select Y-axis column for File 2", columns_2, key="y2")
+
+    # Dropdown for graph type
+    graph_type = st.selectbox(
+        "Select Graph Type",
+        ["Line", "Scatter", "Bar", "Pie"]
     )
-    
-    if file_choice == "File 1" and uploaded_file_1 is not None:
-        data = pd.read_csv(uploaded_file_1)
-        st.write("### Data Preview (File 1)")
-        st.dataframe(data)
-    elif file_choice == "File 2" and uploaded_file_2 is not None:
-        data = pd.read_csv(uploaded_file_2)
-        st.write("### Data Preview (File 2)")
-        st.dataframe(data)
-    else:
-        st.info("Please upload both files to choose between them.")
-    
-    if file_choice != "None":
-        # Dropdown for selecting columns
-        columns = data.columns.tolist()
-        x_column = st.selectbox("Select X-axis column", columns)
-        y_column = st.selectbox("Select Y-axis column", columns)
 
-        # Dropdown for graph type
-        graph_type = st.selectbox(
-            "Select Graph Type",
-            ["Line", "Scatter", "Bar", "Pie"]
-        )
+    # Plot button
+    if st.button("Plot Graphs"):
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))  # Create two subplots side by side
 
-        # Plot button
-        if st.button("Plot Graph"):
-            fig, ax = plt.subplots()
+        # Plot for File 1
+        if graph_type == "Line":
+            ax1.plot(data_1[x_column_1], data_1[y_column_1], marker='o')
+            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Line Plot)")
+        
+        elif graph_type == "Scatter":
+            ax1.scatter(data_1[x_column_1], data_1[y_column_1])
+            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Scatter Plot)")
+        
+        elif graph_type == "Bar":
+            ax1.bar(data_1[x_column_1], data_1[y_column_1])
+            ax1.set_title(f"{y_column_1} vs {x_column_1} (File 1 - Bar Chart)")
 
-            if graph_type == "Line":
-                ax.plot(data[x_column], data[y_column], marker='o')
-                ax.set_title(f"{y_column} vs {x_column} (Line Plot)")
+        elif graph_type == "Pie":
+            if len(data_1[x_column_1].unique()) <= 10:  # Pie chart requires fewer unique categories
+                ax1.pie(
+                    data_1[y_column_1],
+                    labels=data_1[x_column_1],
+                    autopct='%1.1f%%',
+                    startangle=90,
+                )
+                ax1.set_title(f"{y_column_1} (File 1 - Pie Chart)")
 
-            elif graph_type == "Scatter":
-                ax.scatter(data[x_column], data[y_column])
-                ax.set_title(f"{y_column} vs {x_column} (Scatter Plot)")
+        # Plot for File 2
+        if graph_type == "Line":
+            ax2.plot(data_2[x_column_2], data_2[y_column_2], marker='o')
+            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Line Plot)")
+        
+        elif graph_type == "Scatter":
+            ax2.scatter(data_2[x_column_2], data_2[y_column_2])
+            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Scatter Plot)")
+        
+        elif graph_type == "Bar":
+            ax2.bar(data_2[x_column_2], data_2[y_column_2])
+            ax2.set_title(f"{y_column_2} vs {x_column_2} (File 2 - Bar Chart)")
 
-            elif graph_type == "Bar":
-                ax.bar(data[x_column], data[y_column])
-                ax.set_title(f"{y_column} vs {x_column} (Bar Chart)")
+        elif graph_type == "Pie":
+            if len(data_2[x_column_2].unique()) <= 10:  # Pie chart requires fewer unique categories
+                ax2.pie(
+                    data_2[y_column_2],
+                    labels=data_2[x_column_2],
+                    autopct='%1.1f%%',
+                    startangle=90,
+                )
+                ax2.set_title(f"{y_column_2} (File 2 - Pie Chart)")
 
-            elif graph_type == "Pie":
-                # Pie chart only makes sense for single-column data
-                if len(data[x_column].unique()) <= 10:  # Limit to 10 unique categories for readability
-                    plt.pie(
-                        data[y_column],
-                        labels=data[x_column],
-                        autopct='%1.1f%%',
-                        startangle=90,
-                    )
-                    plt.title(f"{y_column} (Pie Chart)")
-                else:
-                    st.error("Pie chart requires fewer unique categories in the X-axis.")
+        # Set common axis labels for the plots
+        if graph_type != "Pie":
+            ax1.set_xlabel(x_column_1)
+            ax1.set_ylabel(y_column_1)
+            ax2.set_xlabel(x_column_2)
+            ax2.set_ylabel(y_column_2)
 
-            if graph_type != "Pie":
-                ax.set_xlabel(x_column)
-                ax.set_ylabel(y_column)
-                st.pyplot(fig)
-            else:
-                st.pyplot(plt)
+        st.pyplot(fig)
 
-        st.write("Tip: Ensure the selected columns are numeric for meaningful plots.")
 else:
-    st.info("Please upload two CSV files to get started.")
+    st.info("Please upload both CSV files to get started.")
